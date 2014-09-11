@@ -56,7 +56,7 @@ coreos:
     content: |
       [Unit]
       Description=dokkaa-ambassador
-      After=docker.service
+      After=skydns.service
       Requires=docker.service
 
       [Service]
@@ -64,8 +64,7 @@ coreos:
                   -v /var/run/docker.sock:/var/run/docker.sock \
                   -e HOST_IP=$public_ipv4 \
                   -e DOCKER_HOST=unix:///var/run/docker.sock \
-                  -e ETCD_ADDR=$public_ipv4:4001 \
-                  --dns=$public_ipv4 \
+                  --dns=$(docker inspect -f '{{ .NetworkSettings.IPAddress }}' skydns) \
                   --restart=always \
                   k2nr/dokkaa-ambassador
       ExecStop=/usr/bin/docker stop ambassador
