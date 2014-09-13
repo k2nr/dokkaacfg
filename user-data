@@ -56,7 +56,7 @@ coreos:
     content: |
       [Unit]
       Description=dokkaa-ambassador
-      After=skydns.service
+      After=docker.service
       Requires=docker.service
 
       [Service]
