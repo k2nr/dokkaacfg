@@ -42,6 +42,7 @@ coreos:
       Requires=docker.service
 
       [Service]
+      ExecStartPre=/usr/bin/docker pull k2nr/dokkaa-conductor
       ExecStart=/usr/bin/docker run --name conductor \
                   -v /var/run/docker.sock:/var/run/docker.sock \
                   -e HOST_IP=$public_ipv4 \
@@ -49,7 +50,7 @@ coreos:
                   -e ETCD_ADDR=$public_ipv4:4001 \
                   --restart=always \
                   k2nr/dokkaa-conductor
-      ExecStop=/usr/bin/docker stop conductor
+      ExecStop=/usr/bin/docker rm -f conductor
   - name: dokkaa-ambassador.service
     command: start
     enable: true
@@ -60,13 +61,14 @@ coreos:
       Requires=docker.service
 
       [Service]
+      ExecStartPre=/usr/bin/docker pull k2nr/dokkaa-ambassador
       ExecStart=/usr/bin/docker run --name ambassador \
                   -v /var/run/docker.sock:/var/run/docker.sock \
                   -e DOCKER_HOST=unix:///var/run/docker.sock \
                   --dns=$public_ipv4 \
                   --restart=always \
                   k2nr/dokkaa-ambassador
-      ExecStop=/usr/bin/docker stop ambassador
+      ExecStop=/usr/bin/docker rm -f ambassador
   - name: skydns.service
     command: start
     enable: true
@@ -77,10 +79,11 @@ coreos:
       Requires=docker.service
 
       [Service]
+      ExecStartPre=/usr/bin/docker pull k2nr/skydns-docker
       ExecStart=/usr/bin/docker run --name skydns \
                   -e ETCD_MACHINES=http://$public_ipv4:4001 \
                   -e SKYDNS_ADDR=0.0.0.0:53 \
                   -e SKYDNS_NAMESERVERS=8.8.8.8:53,8.8.4.4:53 \
                   -p $public_ipv4:53:53/udp \
                   k2nr/skydns-docker
-      ExecStop=/usr/bin/docker stop skydns
+      ExecStop=/usr/bin/docker rm -f skydns
