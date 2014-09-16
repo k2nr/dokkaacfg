@@ -50,6 +50,7 @@ coreos:
                   -e ETCD_ADDR=$public_ipv4:4001 \
                   --restart=always \
                   k2nr/dokkaa-conductor
+      TimeoutStartSec=30m
       ExecStop=/usr/bin/docker rm -f conductor
   - name: dokkaa-ambassador.service
     command: start
@@ -68,6 +69,7 @@ coreos:
                   --dns=$public_ipv4 \
                   --restart=always \
                   k2nr/dokkaa-ambassador
+      TimeoutStartSec=30m
       ExecStop=/usr/bin/docker rm -f ambassador
   - name: skydns.service
     command: start
@@ -86,4 +88,5 @@ coreos:
                   -e SKYDNS_NAMESERVERS=8.8.8.8:53,8.8.4.4:53 \
                   -p $public_ipv4:53:53/udp \
                   k2nr/skydns-docker
+      TimeoutStartSec=30m
       ExecStop=/usr/bin/docker rm -f skydns
