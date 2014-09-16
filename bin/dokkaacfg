@@ -1,0 +1,34 @@
+#!/usr/bin/env ruby
+
+$: << File.expand_path("../../lib/", __FILE__)
+
+require 'dokkaacfg'
+require 'optparse'
+
+options = {}
+optparse = OptionParser.new
+optparse.on("-p VAL", "--provider=VAL", "Cloud provider name") do |p|
+  options[:provider] = p
+end
+
+optparse.on("--scale=VAL", "Initial scale") { |s| options[:scale] = s.to_i }
+optparse.on("--region=VAL", "Region") { |r| options[:region] = r }
+optparse.on("--slug=VAL", "Slug") { |s| options[:slug] = s }
+optparse.on("--ssh_key=VAL", "SSH key") { |s| options[:ssh_key] = s }
+optparse.parse!
+
+subcmd = ARGV[0]
+args   = ARGV[1..-1]
+
+provider_name = options.delete :provider
+case provider_name
+when "vagrant"
+  require 'dokkaacfg/vagrant'
+  provider = DokkaaCfg::Vagrant.new
+when "digitalocean"
+  require 'dokkaacfg/digitalocean'
+  provider = DokkaaCfg::DigitalOcean.new
+else
+end
+
+provider.execute(subcmd, args, options)
