@@ -13,7 +13,8 @@ module DokkaaCfg
       @client = Barge::Client.new(access_token: access_token)
     end
 
-    def up(args, options={})
+    def up(args, options_={})
+      options = options_.clone
       options[:scale]  ||= 1
       options[:region] ||= 'sfo1'
       options[:slug]   ||= '512mb'
@@ -42,7 +43,7 @@ module DokkaaCfg
     def scale(args, options=nil)
     end
 
-    def down(args, options=nil)
+    def down(args, options={})
       droplets = @client.droplet.all["droplets"]
       r = droplet_regexp
       droplets.each do |d|
@@ -53,8 +54,6 @@ module DokkaaCfg
     end
 
     private
-    def coreos_user_data
-    end
     def droplet_regexp
       Regexp.new("^#{DROPLET_NAME_PREFIX}")
     end
