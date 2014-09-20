@@ -28,7 +28,7 @@ module DokkaaCfg
       (1..options[:scale]).each do |n|
         name = "#{DROPLET_NAME_PREFIX}#{n}"
         puts "launching #{name}"
-        p @client.droplet.create(
+        @client.droplet.create(
           name: name,
           region: options[:region],
           size: options[:slug],
@@ -48,7 +48,7 @@ module DokkaaCfg
       r = droplet_regexp
       droplets.each do |d|
         if r.match(d.name)
-          p @client.droplet.destroy(d.id)
+          @client.droplet.destroy(d.id)
         end
       end
     end
