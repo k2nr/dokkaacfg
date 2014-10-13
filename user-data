@@ -42,6 +42,7 @@ coreos:
       Requires=docker.service
 
       [Service]
+      EnvironmentFile=/etc/environment
       ExecStartPre=/usr/bin/docker pull k2nr/dokkaa-conductor
       ExecStart=/usr/bin/docker run --name __conductor \
                   -v /var/run/docker.sock:/var/run/docker.sock \
@@ -90,3 +91,45 @@ coreos:
                   k2nr/skydns-docker
       TimeoutStartSec=30m
       ExecStop=/usr/bin/docker rm -f __skydns
+  - name: dokkaa-api.service
+    command: start
+    enable: true
+    content: |
+      [Unit]
+      Description=dokkaa-api
+      After=dokkaa-conductor.service
+      Requires=docker.service
+
+      [Service]
+      ExecStartPre=/usr/bin/docker pull k2nr/dokkaa-api
+      ExecStart=/usr/bin/docker run --name dokkaa-api \
+                  -e ETCD_ADDR=http://$public_ipv4:4001 \
+                  -e DOKKAA_APP_NAME=api \
+                  -e DOKKAA_SERVICE_API=80 \
+                  -e DOKKAA_ROLE_API=web \
+                  -P \
+                  k2nr/dokkaa-api
+      TimeoutStartSec=30m
+      ExecStop=/usr/bin/docker rm -f dokkaa-api
+
+      [X-Fleet]
+      Global=true
+  - name: dokkaa-web-router.service
+    command: start
+    enable: true
+    content: |
+      [Unit]
+      Description=dokkaa-web-router
+      After=skydns.service
+      Requires=docker.service
+
+      [Service]
+      ExecStartPre=/usr/bin/docker pull k2nr/dokkaa-web-router
+      ExecStart=/usr/bin/docker run --name __web-router \
+                  -e NS_IP=$public_ipv4 \
+                  -e TARGET=web.skydns.local \
+                  -e DOMAINS=dokkaa.io \
+                  -p 80:80 \
+                  k2nr/dokkaa-web-router
+      TimeoutStartSec=30m
+      ExecStop=/usr/bin/docker rm -f __web-router
