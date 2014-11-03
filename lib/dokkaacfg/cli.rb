@@ -8,8 +8,10 @@ module DokkaaCfg
     option :region,  type: :string,  default: 'sfo1'
     option :slug,    type: :string,  default: '512mb'
     option :ssh_key, type: :string,  required: true
+    option :domain,  type: :string,  required: true
+    option :token,   type: :string
     def up
-      dio = DigitalOcean.new
+      dio = DigitalOcean.new(options[:token])
       dio.execute("up", nil, options)
     end
 
