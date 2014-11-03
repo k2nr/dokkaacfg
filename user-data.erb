@@ -11,27 +11,6 @@ coreos:
     command: start
   - name: fleet.service
     command: start
-  - name: docker-tcp.socket
-    command: start
-    enable: true
-    content: |
-      [Unit]
-      Description=Docker Socket for the API
-
-      [Socket]
-      ListenStream=2375
-      Service=docker.service
-      BindIPv6Only=both
-
-      [Install]
-      WantedBy=sockets.target
-       [Socket]
-        ListenStream=2375
-        Service=docker.service
-        BindIPv6Only=both
-
-        [Install]
-        WantedBy=sockets.target
   - name: dokkaa-conductor.service
     command: start
     enable: true
@@ -44,7 +23,7 @@ coreos:
       [Service]
       EnvironmentFile=/etc/environment
       ExecStartPre=/usr/bin/docker pull k2nr/dokkaa-conductor
-      ExecStart=/usr/bin/docker run --name __conductor \
+      ExecStart=/usr/bin/docker run --name dokkaa-conductor \
                   -v /var/run/docker.sock:/var/run/docker.sock \
                   -e HOST_IP=$public_ipv4 \
                   -e DOCKER_HOST=unix:///var/run/docker.sock \
@@ -52,7 +31,7 @@ coreos:
                   --restart=always \
                   k2nr/dokkaa-conductor
       TimeoutStartSec=30m
-      ExecStop=/usr/bin/docker rm -f __conductor
+      ExecStop=/usr/bin/docker rm -f dokkaa-conductor
   - name: dokkaa-ambassador.service
     command: start
     enable: true
@@ -64,14 +43,14 @@ coreos:
 
       [Service]
       ExecStartPre=/usr/bin/docker pull k2nr/dokkaa-ambassador
-      ExecStart=/usr/bin/docker run --name __ambassador \
+      ExecStart=/usr/bin/docker run --name dokkaa-ambassador \
                   -v /var/run/docker.sock:/var/run/docker.sock \
                   -e DOCKER_HOST=unix:///var/run/docker.sock \
                   --dns=$public_ipv4 \
                   --restart=always \
                   k2nr/dokkaa-ambassador
       TimeoutStartSec=30m
-      ExecStop=/usr/bin/docker rm -f __ambassador
+      ExecStop=/usr/bin/docker rm -f dokkaa-ambassador
   - name: skydns.service
     command: start
     enable: true
@@ -83,14 +62,14 @@ coreos:
 
       [Service]
       ExecStartPre=/usr/bin/docker pull k2nr/skydns-docker
-      ExecStart=/usr/bin/docker run --name __skydns \
+      ExecStart=/usr/bin/docker run --name dokkaa-skydns \
                   -e ETCD_MACHINES=http://$public_ipv4:4001 \
                   -e SKYDNS_ADDR=0.0.0.0:53 \
                   -e SKYDNS_NAMESERVERS=8.8.8.8:53,8.8.4.4:53 \
                   -p $public_ipv4:53:53/udp \
                   k2nr/skydns-docker
       TimeoutStartSec=30m
-      ExecStop=/usr/bin/docker rm -f __skydns
+      ExecStop=/usr/bin/docker rm -f dokkaa-skydns
   - name: dokkaa-api.service
     command: start
     enable: true
@@ -125,7 +104,7 @@ coreos:
 
       [Service]
       ExecStartPre=/usr/bin/docker pull k2nr/dokkaa-web-router
-      ExecStart=/usr/bin/docker run --name __web-router \
+      ExecStart=/usr/bin/docker run --name dokkaa-web-router \
                   -e NS_IP=$public_ipv4 \
                   -e TARGET=web.skydns.local \
                   -e DOMAINS=<%= domains %> \
@@ -133,4 +112,4 @@ coreos:
                   -p 443:443 \
                   k2nr/dokkaa-web-router
       TimeoutStartSec=30m
-      ExecStop=/usr/bin/docker rm -f __web-router
+      ExecStop=/usr/bin/docker rm -f dokkaa-web-router
