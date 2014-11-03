@@ -23,7 +23,7 @@ module DokkaaCfg
           k.id
         end
       end.compact
-      user_data = UserData.make_user_data
+      user_data = UserData.make_user_data(domains: options[:domain])
 
       (1..options[:scale]).each do |n|
         name = "#{DROPLET_NAME_PREFIX}#{n}"

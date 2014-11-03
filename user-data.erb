@@ -3,7 +3,7 @@ coreos:
   etcd:
     addr: $public_ipv4:4001
     peer-addr: $public_ipv4:7001
-    discovery: https://discovery.etcd.io/40a854ba6063d605c42571e23dad4e5d
+    discovery: https://discovery.etcd.io/bd5bb9479cbc3b9f8a4558b5e75f8c73
   fleet:
     public-ip: $public_ipv4
   units:
@@ -128,8 +128,9 @@ coreos:
       ExecStart=/usr/bin/docker run --name __web-router \
                   -e NS_IP=$public_ipv4 \
                   -e TARGET=web.skydns.local \
-                  -e DOMAINS=dokkaa.io \
+                  -e DOMAINS=<%= domains %> \
                   -p 80:80 \
+                  -p 443:443 \
                   k2nr/dokkaa-web-router
       TimeoutStartSec=30m
       ExecStop=/usr/bin/docker rm -f __web-router
