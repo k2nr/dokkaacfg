@@ -82,7 +82,7 @@ coreos:
       [Service]
       ExecStartPre=/usr/bin/docker pull k2nr/dokkaa-api
       ExecStart=/usr/bin/docker run --name dokkaa-api \
-                  -e ETCD_ADDR=http://$public_ipv4:4001 \
+                  -e ETCD_ADDR=$public_ipv4:4001 \
                   -e DOKKAA_APP_NAME=api \
                   -e DOKKAA_SERVICE_API=80 \
                   -e DOKKAA_ROLE_API=web \
